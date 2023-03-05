@@ -5,7 +5,6 @@ use zero_to_production::configuration::get_configuration;
 
 #[tokio::test]
 async fn health_check_works() {
-
     let address = spawn_app();
     let client = reqwest::Client::new();
 
@@ -21,7 +20,6 @@ async fn health_check_works() {
 
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
-
     let app_address = spawn_app();
     let configuration = get_configuration().expect("Failed to read configuration");
 
@@ -48,14 +46,13 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
         .fetch_one(&mut connection)
         .await
         .expect("Failed to fetch saved subscription");
-    
+
     assert_eq!(saved.email, "cameron.raw89@gmail.com");
     assert_eq!(saved.name, "cameron raw");
 }
 
 #[tokio::test]
 async fn subscribe_returns_a_400_when_data_is_missing() {
-
     let app_address = spawn_app();
     let client = reqwest::Client::new();
     let test_cases = vec![
@@ -65,7 +62,6 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     ];
 
     for (invalid_body, error_message) in test_cases {
-
         let response = client
             .post(&format!("{}/subscriptions", &app_address))
             .header("Content-Type", "application/x-www-form-urlencoded")
