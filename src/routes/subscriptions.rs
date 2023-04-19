@@ -9,18 +9,18 @@ pub struct FormData {
     email: String,
     name: String,
 }
-pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    let request_id = Uuid::new_v4();
 
-    let request_span = tracing::info_span!(
-        "Adding a new subscriber.",
-        %request_id,
+// The % symbol is telling the tracing crate to use the Display values
+#[tracing::instrument(
+    name = "Adding a new subscriber",
+    skip(form, pool),
+    fields(
+        request_id = %Uuid::new_v4(),
         subscriber_email = %form.email,
         subscriber_name = %form.name
-    );
-
-    let _request_span_guard = request_span.enter();
-
+    )
+)]
+pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> HttpResponse {
     let query_span = 
         tracing::info_span!("Saving new subscriber in the database.");
 
@@ -39,15 +39,10 @@ pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> Ht
         .await
         {
             Ok(_) => {
-                tracing::info!("request_id {} - Adding '{}' '{}' as a new subscriber.", 
-                    request_id, 
-                    form.email, 
-                    form.name);
-                tracing::info!("request_id {} - New subscriber details have been saved!", request_id);
                 HttpResponse::Ok().finish()
             },
             Err(err) => {
-                tracing::error!("request_id {} - Failed to execute query: {:?}", request_id, err);
+                tracing::error!("Failed to execute query: {:?}", err);
                 println!("Failed to execute query: {}", err);
                 HttpResponse::InternalServerError().finish()
             }
