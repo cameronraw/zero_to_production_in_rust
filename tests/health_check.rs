@@ -1,10 +1,16 @@
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
+use once_cell::sync::Lazy;
+
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let subscriber = get_subscriber("test".into(), "debug".into());
+    init_subscriber(subscriber);
+});
 
 use zero_to_production::{
     configuration::{get_configuration, DatabaseSettings},
-    startup::run,
+    startup::run, telemetry::{get_subscriber, init_subscriber},
 };
 
 #[tokio::test]
@@ -82,6 +88,8 @@ pub struct TestApp {
 }
 
 async fn spawn_app() -> TestApp {
+
+    Lazy::force(&TRACING);
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind to random port");
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
