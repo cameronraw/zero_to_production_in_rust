@@ -1,5 +1,5 @@
-use chrono::Utc;
 use actix_web::{web, HttpResponse};
+use chrono::Utc;
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 use tracing::Instrument;
@@ -15,14 +15,12 @@ pub struct FormData {
     name = "Adding a new subscriber",
     skip(form, pool),
     fields(
-        request_id = %Uuid::new_v4(),
         subscriber_email = %form.email,
         subscriber_name = %form.name
     )
 )]
 pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    let query_span = 
-        tracing::info_span!("Saving new subscriber in the database.");
+    let query_span = tracing::info_span!("Saving new subscriber in the database.");
 
     match sqlx::query!(
         r#"
@@ -34,17 +32,15 @@ pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> Ht
         form.name,
         Utc::now()
     )
-        .execute(pool.get_ref())
-        .instrument(query_span)
-        .await
-        {
-            Ok(_) => {
-                HttpResponse::Ok().finish()
-            },
-            Err(err) => {
-                tracing::error!("Failed to execute query: {:?}", err);
-                println!("Failed to execute query: {}", err);
-                HttpResponse::InternalServerError().finish()
-            }
+    .execute(pool.get_ref())
+    .instrument(query_span)
+    .await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(err) => {
+            tracing::error!(" Failed to execute query: {:?}", err);
+            println!("Failed to execute query: {}", err);
+            HttpResponse::InternalServerError().finish()
         }
+    }
 }

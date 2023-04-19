@@ -6,5 +6,10 @@ A repo for marking my progress through "Zero to Production in Rust", a book by L
 
 ## Where I currently am
 
-So far I have learned how to create a basic API, with integration tests.
-Next I will be working through the 'Telemetry' section.
+I have learned how to create a basic API, with integration tests.
+
+Automated containerized tests for the pipeline have been achieved.
+
+High quality telemetry have been applied throughout the application (and will continue to be).
+
+I am now about to start Chapter 5 : Going Live
